@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>A baby name? See Most Popular Names in NYC!</title>
+	<link rel="stylesheet" href="a4.css">
+</head>
+<body>
+	<div class="wrapper">
+	<header></header>
+	<nav>
+	<section id="controls">
+	Year:
+	<select id="year">
+		<option>2011</option>
+		<option>2012</option>
+		<option>2013</option>
+		<option>2014</option>
+	</select>
+	Mother's ethnic Group:
+    <select id="ethnic_group"></select>
+    Gender:
+    <select id="gender">
+    	<option>MALE</option>
+    	<option>FEMALE</option>
+    </select>
+    <button id="findNames">Find names</button>
+    </section>
+    </nav>
+    <aside>
+    	<ul id="results"></ul>
+    </aside>
+    <article>
+    	<div id="info">The info goes here</div>
+		<div id="2011info"></div>
+		<div id="2012info"></div>
+		<div id="2013info"></div>
+		<div id="2014info"></div>
+    </article>
+	<footer>This page may take several seconds to load</footer>
+    </div>
+</body>
+
+<script type="text/javascript">
+	var header = document.querySelector('header');
+	var controls = document.querySelector('#controls');
+    var results = document.querySelector('#results');
+    var year = document.querySelector('#year');
+	var ethnic_group = document.querySelector('#ethnic_group');
+	var gender = document.querySelector('#gender');
+
+	var findButton = document.querySelector('#findNames');
+    findButton.addEventListener('click', getNames);
+	
+	var url = 'http://localhost/A4/babyname.json';
+    var xhr = new XMLHttpRequest();
+	var obj;
+	var ethnicgrouparray = [];
+	// initialize the array for printing the results
+	var names = [];
+
+	var names2011 = [];
+	var names2012 = [];
+	var names2013 = [];
+	var names2014 = [];
+
+	loadData();
+
+	function loadData(){
+		xhr.onreadystatechange = function() {
+	      if (xhr.readyState === XMLHttpRequest.DONE && xhr.status == 200) {
+             var nrhpText = xhr.response;
+             obj = JSON.parse(nrhpText);
+		     header.textContent = obj.meta.view.name + 'From 2011 to 2014';
+			 
+		     ethnicgrouparray = getEthnicGroups();
+
+		     //store all the names found in each year
+			 names2011 = getNames2011();
+			 names2012 = getNames2012();
+			 names2013 = getNames2013();
+			 names2014 = getNames2014();
+			 
+		     // Add the ethnic groups to the dropdown list
+		     for (i=0; i<ethnicgrouparray.length; i++) {
+                var opt = document.createElement('option');
+	            opt.textContent = ethnicgrouparray[i];
+	            ethnic_group.appendChild(opt);
+             }
+	      }
+	   }
+       xhr.open('GET', url);
+       xhr.send();	   
+	}
+
+	function getEthnicGroups(){
+		var ethnicgrouplist = [];
+        var nrhpText = xhr.response;
+        obj = JSON.parse(nrhpText);			 
+		    for (i = 0; i < obj.data.length; i++) {
+		     	var group = obj.data[i][10];
+		     	if(ethnicgrouplist.indexOf(group) == -1){
+		     			  ethnicgrouplist.push(group);
+		     	}	
+		     	}
+		ethnicgrouplist.sort();
+   	    return ethnicgrouplist;  
+	}
+
+	function getNames(){
+		while (results.hasChildNodes()){
+		results.removeChild(results.firstChild);
+		}
+
+		names = []; //initialize the names array before each search
+
+		var nrhpText = xhr.response;
+    	obj = JSON.parse(nrhpText);
+
+    	var selectedyear = year.options[year.selectedIndex].text;
+    	var selectedgender = gender.options[gender.selectedIndex].text;
+		var selectedgroup = ethnic_group.options[ethnic_group.selectedIndex].text;
+
+		for (i = 0; i < obj.data.length; i++){
+			if((obj.data[i][8] == selectedyear) && (obj.data[i][9] == selectedgender) && (obj.data[i][10] == selectedgroup))
+			{
+				var name = obj.data[i][11];
+		     		if(names.indexOf(name) == -1){
+		     			  names.push(name);
+		     		}
+			}
+		}
+
+		if(names.length != 0){
+			var information = document.createElement('p');
+			information.textContent = 'Results are shown in an alphabetical order:'
+			results.appendChild(information);
+			for(m = 0; m < names.length; m++){
+    		var nameresult = document.createElement('li');
+    		var href = "#info";
+    		var link = document.createElement('a');
+    		link.setAttribute('href', href);
+    		link.setAttribute('id',names[m]);
+    		link.setAttribute('onclick','getInfo(this.id)');
+  			link.textContent = names[m];
+  			nameresult.appendChild(link);
+    		results.appendChild(nameresult);
+   			}	
+		}
+		else{
+			alert("No results, please try another search!");
+			location.reload();
+		}
+	}
+
+	function getInfo(name){
+		var selectedname = name;
+		var statement2011 = getInfo2011(selectedname);
+		var statement2012 = getInfo2012(selectedname);
+		var statement2013 = getInfo2013(selectedname);
+		var statement2014 = getInfo2014(selectedname);
+
+		var info = document.getElementById('info');
+		info.textContent = 'Data in 2011-2014 are shown as below:';
+
+		var info2011 = document.getElementById('2011info');
+		info2011.textContent = statement2011;
+
+		var info2012 = document.getElementById('2012info');
+		info2012.textContent = statement2012;
+
+		var info2013 = document.getElementById('2013info');
+		info2013.textContent = statement2013;
+
+		var info2014 = document.getElementById('2014info');
+		info2014.textContent = statement2014;
+
+	}
+	
+	// these are functions which find the data of the selected name in each year
+	function getInfo2011(name){
+		var selectedname = name;
+		for (i = 0; i < obj.data.length; i++){
+			if((obj.data[i][11] == selectedname) && (obj.data[i][8] == '2011')){
+				var count = obj.data[i][12];
+				var rank = obj.data[i][13];
+				var statement = 'In 2011, ' + count + ' people used the name \'' + selectedname + '\'' + ' in all ethnic groups and genders, and it ranked ' + rank + ' in all the names this year.';
+			}
+		}
+		for(m = 0; m < names2011.length; m++){
+			if(names2011.indexOf(selectedname) == -1){
+				var statement = 'No data found in 2011';
+			}
+		}
+		return statement;
+	}
+
+	function getInfo2012(name){
+		var selectedname = name;
+		for (i = 0; i < obj.data.length; i++){
+			if((obj.data[i][11] == selectedname) && (obj.data[i][8] == '2012')){
+				var count = obj.data[i][12];
+				var rank = obj.data[i][13];
+				var statement = 'In 2012, ' + count + ' people used the name \'' + selectedname + '\'' + ' in all ethnic groups and genders, and it ranked ' + rank + ' in all the names this year.';
+			}
+		}
+		for(m = 0; m < names2012.length; m++){
+			if(names2012.indexOf(selectedname) == -1){
+				var statement = 'No data found in 2012';
+			}
+		}
+		return statement;
+	}
+
+	function getInfo2013(name){
+		var selectedname = name;
+		for (i = 0; i < obj.data.length; i++){
+			if((obj.data[i][11] == selectedname) && (obj.data[i][8] == '2013')){
+				var count = obj.data[i][12];
+				var rank = obj.data[i][13];
+				var statement =  'In 2013, ' + count + ' people used the name \'' + selectedname + '\'' + ' in all ethnic groups and genders, and it ranked ' + rank + ' in all the names this year.';
+			}
+		}
+		for(m = 0; m < names2013.length; m++){
+			if(names2013.indexOf(selectedname) == -1){
+				var statement = 'No data found in 2013';
+			}
+		}
+		return statement;
+	}
+
+	function getInfo2014(name){
+		var selectedname = name;
+		for (i = 0; i < obj.data.length; i++){
+			if((obj.data[i][11] == selectedname) && (obj.data[i][8] == '2014')){
+				var count = obj.data[i][12];
+				var rank = obj.data[i][13];
+				var statement =  'In 2014, ' + count + ' people used the name \'' + selectedname + '\'' + ' in all ethnic groups and genders, and it ranked ' + rank + ' in all the names this year.';
+			}
+		}
+		for(m = 0; m < names2014.length; m++){
+			if(names2014.indexOf(selectedname) == -1){
+				var statement = 'No data found in 2014';
+			}
+		}
+		return statement;
+	}
+
+	// these are funcions which find all the names in each year
+	function getNames2011(){
+		var namearray = [];
+		for (i = 0; i < obj.data.length; i++){
+			if(obj.data[i][8] == '2011'){
+				var a = obj.data[i][11];
+		     		if(namearray.indexOf(a) == -1){
+		     			  namearray.push(a);
+		     		}
+			}
+		}
+		return namearray;
+	}
+
+	function getNames2012(){
+		var namearray = [];
+		for (i = 0; i < obj.data.length; i++){
+			if(obj.data[i][8] == '2012'){
+				var a = obj.data[i][11];
+		     		if(namearray.indexOf(a) == -1){
+		     			  namearray.push(a);
+		     		}
+			}
+		}
+		return namearray;
+	}
+
+	function getNames2013(){
+		var namearray = [];
+		for (i = 0; i < obj.data.length; i++){
+			if(obj.data[i][8] == '2013'){
+				var a = obj.data[i][11];
+		     		if(namearray.indexOf(a) == -1){
+		     			  namearray.push(a);
+		     		}
+			}
+		}
+		return namearray;
+	}
+
+	function getNames2014(){
+		var namearray = [];
+		for (i = 0; i < obj.data.length; i++){
+			if(obj.data[i][8] == '2014'){
+				var a = obj.data[i][11];
+		     		if(namearray.indexOf(a) == -1){
+		     			  namearray.push(a);
+		     		}
+			}
+		}
+		return namearray;
+	}
+</script>
+</html>

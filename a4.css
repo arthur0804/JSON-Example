@@ -1,0 +1,64 @@
+body {
+  width: 90%;
+  margin: 0 auto; 
+}
+
+header {
+  grid-area: head; 
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 2%;
+  color: dodgerblue;
+  text-align: center;
+}
+
+footer {
+  grid-area: foot;
+  margin-top: 3%;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+article {
+  grid-area: main;
+  font-size: 1rem;
+  margin-top: 10px;
+  text-align: left;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  font-color: green;
+}
+
+aside {
+  grid-area: side;
+  margin-top: 10px;
+}
+
+nav {
+  grid-area: nav;
+}
+
+section {
+  color: dodgerblue;
+  text-align: center;
+  margin-top: 2%;
+}
+
+li{
+	font-size: 1rem;
+}
+
+p{
+  font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+.wrapper{
+ display: grid;
+ grid-template-columns: repeat(9, 1fr);
+ grid-template-areas:
+ "head head head head head head head head head"
+ "nav nav nav nav nav nav nav nav nav "
+ "side side side main main main main main main"
+ "foot foot foot foot foot foot foot foot foot";
+ margin: 0; 
+}
